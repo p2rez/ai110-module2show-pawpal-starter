@@ -5,7 +5,19 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+Response: Owner is the person using the app. They have a name and a certain amount of time available in their day. They can register one or more pets and request a schedule based on their tasks.
+
+Pet belongs to an owner. Each pet has basic info like a name, species, and age. A pet can have multiple care tasks associated with it.
+
+Task represents a single care activity — like feeding, a walk, or a vet visit. Each task has a title, how long it takes, and a priority level (low, medium, or high).
+
+Schedule is the output of the app. It looks at all the tasks, compares them against how much time the owner has available, and decides which tasks to include and in what order — prioritizing the most urgent ones first. It can also explain why it made those choices.
 - What classes did you include, and what responsibilities did you assign to each?
+
+Response: users need to add a pet profile with basic info like name, breed, and age. 
+users need to log daily activities like feeding, walks, and vet visits.
+users need to view their pets care history to track over time
+
 
 **b. Design changes**
 
