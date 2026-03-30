@@ -38,6 +38,37 @@ The `Scheduler` class was extended with four algorithmic features beyond the bas
 **Conflict detection**
 `detect_conflicts()` returns a plain list of warning strings — it never raises. It checks for three problems: (1) total pending task time exceeding the daily budget, (2) a single task too long to ever fit, and (3) two or more tasks sharing the same start time. Time-slot conflicts use an O(n) dict-bucket approach and report the pet name alongside each clashing task.
 
+## Testing PawPal+
+
+### Run the test suite
+
+```bash
+python -m pytest tests/test_pawpal.py -v
+```
+
+`-v` (verbose) prints each test name and PASSED/FAILED individually. Omit it for a one-line summary.
+
+### What the tests cover
+
+The suite contains **37 tests** across eight behavioral groups:
+
+| Group | Tests | What is verified |
+|---|---|---|
+| `build_schedule` priority & budget | 5 | High-priority tasks win when time is tight; total scheduled time never exceeds the budget; the second-pass bin-packing recovers small tasks that were initially skipped |
+| `sort_by_time` | 4 | Tasks added out of order come back in chronological HH:MM order; same-hour tasks are ordered by minute; descending sort works; empty schedule returns `[]` without crashing |
+| `filter_tasks` by pet & status | 6 | Pet filtering uses object identity so two pets with the same task name never bleed into each other; unknown pet name returns `[]`; pending/done status filtering works independently and combined |
+| `detect_conflicts` | 5 | Same-slot clashes are caught across pets; different-time tasks produce no false positives; the method always returns a list and never raises; budget overload and duplicate descriptions are also warned |
+| Edge cases | 6 | Pet with no tasks, owner with no pets, all "as needed" tasks, weekly task pinned to Monday only, invalid time format, zero duration |
+| **Sorting correctness** | 3 | Tasks added in reverse order return in strict chronological order; same-hour ordering by minute; descending flag |
+| **Recurrence logic** | 4 | Completing a daily task + calling `renew_recurring_tasks()` creates a new pending copy; the renewed copy is a different object; weekly tasks are not auto-renewed; renewed task appears in the next `build_schedule()` run |
+| **Conflict detection** | 4 | Same-pet clash, cross-pet clash, no false positives on different times, warning message names both pet owners |
+
+### Confidence level
+
+★★★★☆ — 4 / 5
+
+The core scheduling logic (priority ordering, time budget, sorting, filtering, conflict detection, and recurrence) is fully covered by automated tests and all 37 pass. One star is withheld because the UI layer (`app.py`) has no automated tests — Streamlit interactions are exercised manually only, which leaves the wiring between the UI and `Scheduler` unverified by the suite.
+
 ## Getting started
 
 ### Setup

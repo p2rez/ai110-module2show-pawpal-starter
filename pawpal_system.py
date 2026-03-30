@@ -357,6 +357,45 @@ class Scheduler:
 
         return issues
 
+    def renew_recurring_tasks(self) -> list[Task]:
+        """For every completed daily task in the schedule, add a fresh pending
+        copy back to its owning pet so the next build_schedule() includes it.
+
+        Weekly and 'as needed' tasks are not renewed automatically — weekly
+        tasks recur on the owner's schedule, not daily, and 'as needed' tasks
+        have no predictable cadence.
+
+        Returns:
+            A list of the newly created Task objects that were added to pets.
+
+        Example:
+            scheduler.mark_task_complete("Morning walk")
+            renewed = scheduler.renew_recurring_tasks()
+            # renewed[0] is a fresh pending copy of "Morning walk"
+        """
+        task_to_pet: dict[int, Pet] = {
+            id(t): pet
+            for pet in self.owner.pets
+            for t in pet.get_tasks()
+        }
+
+        renewed: list[Task] = []
+        for task in self.scheduled:
+            if task.completed and task.frequency == "daily":
+                owner_pet = task_to_pet.get(id(task))
+                if owner_pet is not None:
+                    fresh = Task(
+                        description=task.description,
+                        duration=task.duration,
+                        frequency=task.frequency,
+                        priority=task.priority,
+                        time=task.time,
+                        completed=False,
+                    )
+                    owner_pet.add_task(fresh)
+                    renewed.append(fresh)
+        return renewed
+
     def total_time_scheduled(self) -> int:
         """Return the total minutes used by all scheduled tasks."""
         return sum(t.duration for t in self.scheduled)
